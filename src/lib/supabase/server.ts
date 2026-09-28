@@ -2,6 +2,7 @@ import "server-only";
 import { createServerClient } from "@supabase/ssr";
 import { createClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
+import { cleanEnv } from "../site";
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from "./env";
 
 /** Client con la sessione dell'utente (rispetta RLS) — Server Components, Server Actions, Route Handlers */
@@ -30,7 +31,7 @@ export function getPublicSupabase() {
 
 /** Client con service role: SOLO lato server, bypassa RLS (creazione ordini, webhook) */
 export function getServiceSupabase() {
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_SECRET_KEY;
+  const key = cleanEnv(process.env.SUPABASE_SECRET_KEY) || cleanEnv(process.env.SUPABASE_SERVICE_ROLE_KEY);
   if (!key) throw new Error("SUPABASE_SERVICE_ROLE_KEY mancante");
   return createClient(SUPABASE_URL, key, { auth: { persistSession: false, autoRefreshToken: false } });
 }

@@ -1,10 +1,15 @@
+/** Valore di una variabile d'ambiente senza spazi e virgolette esterne ("" se assente) */
+export function cleanEnv(value: string | undefined): string {
+  return (value ?? "").trim().replace(/^(["'])(.*)\1$/, "$2").trim();
+}
+
 /**
  * Normalizza un URL inserito a mano nelle variabili d'ambiente (es. su Vercel):
  * "pizzeria.vercel.app" o "https://xyz.supabase.co/rest/v1/" diventano "https://…" senza percorso.
  * Un valore non valido rompeva la build ("Invalid URL").
  */
 export function normalizeOrigin(value: string | undefined, fallback: string): string {
-  const raw = (value ?? "").trim();
+  const raw = cleanEnv(value);
   if (!raw) return fallback;
   try {
     return new URL(/^https?:\/\//i.test(raw) ? raw : `https://${raw}`).origin;
