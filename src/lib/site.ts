@@ -1,3 +1,18 @@
+/**
+ * Normalizza un URL inserito a mano nelle variabili d'ambiente (es. su Vercel):
+ * "pizzeria.vercel.app" o "https://xyz.supabase.co/rest/v1/" diventano "https://…" senza percorso.
+ * Un valore non valido rompeva la build ("Invalid URL").
+ */
+export function normalizeOrigin(value: string | undefined, fallback: string): string {
+  const raw = (value ?? "").trim();
+  if (!raw) return fallback;
+  try {
+    return new URL(/^https?:\/\//i.test(raw) ? raw : `https://${raw}`).origin;
+  } catch {
+    return fallback;
+  }
+}
+
 // Dati statici del locale. I recapiti modificabili (telefono, email…) stanno nella tabella `settings`.
 export const SITE = {
   name: "RistOro dell'Etna",
@@ -5,7 +20,7 @@ export const SITE = {
   claim: "Pizza, brace e sapori dell'Etna.",
   description:
     "Ristorante, pizzeria e braceria a Nicolosi, alle pendici dell'Etna. Pizza con impasto alto e soffice cotta nel forno a legna, carne alla brace, primi della tradizione. Ordina online per asporto o consegna a domicilio.",
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://ristorodelletna.it",
+  url: normalizeOrigin(process.env.NEXT_PUBLIC_SITE_URL, "https://ristorodelletna.it"),
   address: {
     street: "Viale della Regione 27",
     cap: "95030",
